@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSS Feed Reader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .rss-container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    #feed-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #feed-list li {
+      margin: 10px 0;
+    }
+
+    #feed-list a {
+      text-decoration: none;
+      color: #0366d6;
+      font-weight: bold;
+    }
+
+    #feed-list a:hover {
+      text-decoration: underline;
+    }
+
+    .search-bar {
+      margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: #0366d6;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #024ea2;
+    }
+  </style>
+</head>
+<body>
+  <div class="rss-container">
+    <h2>Latest Articles (Web Dev & AI)</h2>
+
+    <div class="search-bar">
+      <input type="text" id="rssInput" placeholder="Enter Dev.to username or tag..." />
+      <button onclick="loadRSS()">Load</button>
+    </div>
+
+    <ul id="feed-list">
+      <li>Loading latest posts…</li>
+    </ul>
+  </div>
+
+  <script>
+    async function loadRSS() {
+      const feedList = document.getElementById("feed-list");
+      feedList.innerHTML = "<li>Loading latest posts…</li>";
+
+      // Get input value (default to AI + Web Dev if empty)
+      let query = document.getElementById("rssInput").value.trim();
+      let url = "";
+
+      if (query) {
+        // If user enters a Dev.to username or tag
+        url = `https://dev.to/api/articles?tag=${query}&per_page=5`;
+      } else {
+        // Default feed: Web Dev + AI
+        url = "https://dev.to/api/articles?per_page=5&tags=ai,webdev";
+      }
+
+      try {
+        const response = await fetch(url);
+        const articles = await response.json();
+
+        feedList.innerHTML = "";
+
+        if (articles.length === 0) {
+          feedList.innerHTML = "<li>No articles found.</li>";
+          return;
+        }
+
+        articles.forEach(article => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
+          feedList.appendChild(li);
+        });
+      } catch (error) {
+        feedList.innerHTML = "<li>Failed to load feed.</li>";
+        console.error("Error fetching feed:", error);
+      }
+    }
+
+    // Load default feed on page load
+    window.onload = loadRSS;
+  </script>
+</body>
+</html>
